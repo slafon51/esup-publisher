@@ -1,0 +1,46 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        java: ['11', '13', '15']
+        
+    env:
+      secrets.RootPassword: secret
+      
+
+    name: Java ${{ matrix.Java }} sample
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java }} version
+      uses: actions/setup-java@v2
+      with:
+        java-version: "${{ matrix.java }}"
+        distribution: 'adopt'
+        cache: maven
+    - name: Run MariaDB container
+      uses: getong/mariadb-action@v1.1
+      with:
+        host port: 3306 # Optional, default value is 3306. The port of host
+        #container port: 3307 # Optional, default value is 3306. The port of container
+        character set server: 'utf8mb4' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+        collation server: 'utf8mb4_unicode_520_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+        #mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MariaDB
+        mysql database: 'publisher_test' # Optional, default value is "test". The specified database which will be create
+        mysql root password: ${{ secrets.RootPassword }} # Required if "mysql user" is empty, default is empty. The root superuser password
+        
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
