@@ -28,14 +28,15 @@ jobs:
 
     env:
       secrets.RootPassword: secret
-
+    name: Run java ${{ matrix.java }} version and npm $ {{ matrix.npm }} version
     steps:
     - uses: actions/checkout@v2
     - name: Set up ENV
       run: |
         sudo locale-gen $LANG
         sudo update-locale LANG=$LANG
-        locale -a
+    - name: Check locales
+      run: locale -a
     - name: Check date
       run: date
     - name: Set up JDK ${{ matrix.java }} version
