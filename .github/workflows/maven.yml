@@ -27,7 +27,8 @@ jobs:
         node: ['12', '14']
 
     env:
-      secrets.RootPassword: 'root'
+      secrets:
+        RootPassword: 'root'
     name: Run java ${{ matrix.java }} version and node ${{ matrix.node }} version
     steps:
     - uses: actions/checkout@v2
@@ -62,8 +63,8 @@ jobs:
         collation server: 'utf8mb4_unicode_520_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
         #mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MariaDB
         mysql database: 'publisher_test' # Optional, default value is "test". The specified database which will be create
-        mysql root password: ${{ secrets.RootPassword }} # Required if "mysql user" is empty, default is empty. The root superuser password
-
+    - name: Test MariaDb
+      run: mysql --port 3306 -D publisher_test -e 'SELECT VERSION()'
     - name: Project requirements
       run: |
         ./mvnw --version
