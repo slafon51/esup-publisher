@@ -21,14 +21,25 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      mariadb:
+        image: mariadb:latest
+        env:
+          MYSQL_HOST: mariadb
+          MYSQL_USER: root
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: publisher_test
+        ports:
+          - 3306/tcp
+        options: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_520_ci --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+
     strategy:
       matrix:
         java: ['8', '11', '13', '15']
         node: ['12', '14']
 
     env:
-      secrets:
-        RootPassword: 'root'
+      secrets.RootPassword: 'root'
     name: Run java ${{ matrix.java }} version and node ${{ matrix.node }} version
     steps:
     - uses: actions/checkout@v2
@@ -52,32 +63,25 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
         cache: 'npm'
-    - name: Shutdown Ubuntu MySQL (SUDO)
-      run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
-    - name: Run MariaDB container
-      uses: getong/mariadb-action@v1.1
-      with:
-        host port: 3306 # Optional, default value is 3306. The port of host
-        #container port: 3307 # Optional, default value is 3306. The port of container
-        character set server: 'utf8mb4' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
-        collation server: 'utf8mb4_unicode_520_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
-        #mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MariaDB
-        mysql database: 'publisher_test' # Optional, default value is "test". The specified database which will be create
-    - name: Test MariaDb
-      run: mysql --port 3306 -D publisher_test -e 'SELECT VERSION()'
     - name: Project requirements
       run: |
         ./mvnw --version
         ./mvnw clean generate-sources -Pci -B
         ./mvnw compile liquibase:update -Pci -B
-        ps -ef | grep mysql
-        # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
-        mysql --port 3306 -h 127.0.0.1 -u root -p${{ secrets.RootPassword }} -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
-          # install npm
+        # install npm
         npm install -g bower
         npm install -g yo@1.3.2
         npm install requirejs@2.1
         npm install jasmine-core@2.4.1
         bower install
+    - name: DB connection test and init from container
+      run: |
+        sudo apt update
+        sudo apt install -y mysql-client
+        mysqladmin ping
+        mysql -hmysql -uroot -proot -e "SHOW DATABASES;"
+        mysql -hmysql -uroot -proot -e "USE publisher_test;SHOW TABLES;"
+        # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
+        mysql -h mariadb -u root -proot -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
     - name: Build with Maven
       run: ./mvnw -Pci -B package --file pom.xml
