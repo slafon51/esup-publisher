@@ -27,7 +27,7 @@ jobs:
         node: ['12', '14']
 
     env:
-      secrets.RootPassword: root
+      secrets.RootPassword: 'root'
     name: Run java ${{ matrix.java }} version and node ${{ matrix.node }} version
     steps:
     - uses: actions/checkout@v2
@@ -35,6 +35,7 @@ jobs:
       run: |
         sudo locale-gen $LANG
         sudo update-locale LANG=$LANG
+        sudo apt install mysql-client
     - name: Check locales
       run: locale -a
     - name: Check date
@@ -50,6 +51,8 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
         cache: 'npm'
+    - name: Shutdown Ubuntu MySQL (SUDO)
+      run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
     - name: Run MariaDB container
       uses: getong/mariadb-action@v1.1
       with:
@@ -66,6 +69,7 @@ jobs:
         ./mvnw --version
         ./mvnw clean generate-sources -Pci -B
         ./mvnw compile liquibase:update -Pci -B
+        ps -ef | grep mysql
         # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
         mysql --port 3306 -h 127.0.0.1 -u root -p${{ secrets.RootPassword }} -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
           # install npm
