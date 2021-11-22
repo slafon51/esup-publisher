@@ -28,7 +28,7 @@ jobs:
 
     env:
       secrets.RootPassword: secret
-    name: Run java ${{ matrix.java }} version and npm $ {{ matrix.npm }} version
+    name: Run java ${{ matrix.java }} version and node $ {{ matrix.node }} version
     steps:
     - uses: actions/checkout@v2
     - name: Set up ENV
