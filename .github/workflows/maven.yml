@@ -9,28 +9,46 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  LANG: "fr_FR.UTF-8"
+  LC_ALL: "fr_FR.UTF-8"
+  LANGUAGE: "fr_FR.UTF-8"
+  LC_CTYPE: "fr_FR.UTF-8"
+  TZ: "Europe/Paris"
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
-        java: ['11', '13', '15']
-        
+        java: ['8', '11', '13', '15']
+        node: ['12', '14']
+
     env:
       secrets.RootPassword: secret
-      
 
-    name: Java ${{ matrix.Java }} sample
     steps:
     - uses: actions/checkout@v2
+    - name: Set up ENV
+      run: |
+        sudo locale-gen $LANG
+        sudo update-locale LANG=$LANG
+        locale -a
+    - name: Check date
+      run: date
     - name: Set up JDK ${{ matrix.java }} version
       uses: actions/setup-java@v2
       with:
         java-version: "${{ matrix.java }}"
         distribution: 'adopt'
-        cache: maven
+        cache: 'maven'
+    - name: Set up Node ${{ matrix.node }} version
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node }}
+        cache: 'npm'
     - name: Run MariaDB container
       uses: getong/mariadb-action@v1.1
       with:
@@ -41,6 +59,19 @@ jobs:
         #mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MariaDB
         mysql database: 'publisher_test' # Optional, default value is "test". The specified database which will be create
         mysql root password: ${{ secrets.RootPassword }} # Required if "mysql user" is empty, default is empty. The root superuser password
-        
+
+    - name: Project requirements
+        run: |
+          ./mvnw --version
+          ./mvnw clean generate-sources -Pci -B
+          ./mvnw compile liquibase:update -Pci -B
+          # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
+          mysql --port 3306 -h 127.0.0.1 -u root -p${{ secrets.RootPassword }} -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
+            # install npm
+          npm install -g bower
+          npm install -g yo@1.3.2
+          npm install requirejs@2.1
+          npm install jasmine-core@2.4.1
+          bower install
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: ./mvnw -Pci -B package --file pom.xml

@@ -830,7 +830,7 @@
             </dependencies>
         </profile>
         <profile>
-            <id>travis</id>
+            <id>ci</id>
             <!-- Same as dev expect for some properties to have less log, etc... all things required by travis -->
             <build>
                 <plugins>
