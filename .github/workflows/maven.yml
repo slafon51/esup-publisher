@@ -25,7 +25,7 @@ jobs:
       mariadb:
         image: wodby/mariadb:latest
         env:
-          MYSQL_HOST: localhost
+          MYSQL_HOST: 127.0.0.1
           MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: publisher_test
@@ -65,6 +65,14 @@ jobs:
       with:
         node-version: ${{ matrix.node }}
         cache: 'npm'
+    - name: DB connection test and conf checks
+      run: |
+        sudo apt update
+        sudo apt install -y mysql-client
+        mysqladmin ping
+        mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
+        mysql -h127.0.0.1 -uroot -proot -e "show variables like 'char%';"
+        mysql -h127.0.0.1 -uroot -proot -e "USE publisher_test;SHOW TABLES;"
     - name: Project requirements
       run: |
         ./mvnw --version
@@ -76,15 +84,9 @@ jobs:
         npm install requirejs@2.1
         npm install jasmine-core@2.4.1
         bower install
-    - name: DB connection test and init from container
+    - name: DB final conf
       run: |
-        sudo apt update
-        sudo apt install -y mysql-client
-        mysqladmin ping
-        mysql -hmysql -uroot -proot -e "SHOW DATABASES;"
-        mysql -hmysql -uroot -proot -e "show variables like 'char%';"
-        mysql -hmysql -uroot -proot -e "USE publisher_test;SHOW TABLES;"
         # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
-        mysql -h mariadb -u root -proot -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
+        mysql -h127.0.0.1 -u root -proot -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
     - name: Build with Maven
       run: ./mvnw -Pci -B package --file pom.xml
