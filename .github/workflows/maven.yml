@@ -69,7 +69,6 @@ jobs:
         sudo apt update
         sudo apt upgrade
         sudo apt install -y mysql-client
-        mysqladmin ping
         mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
         mysql -h127.0.0.1 -uroot -proot -e "show variables like 'char%';"
         mysql -h127.0.0.1 -uroot -proot -e "USE publisher_test;SHOW TABLES;"
