@@ -25,7 +25,7 @@ jobs:
       mariadb:
         image: wodby/mariadb:latest
         env:
-          MYSQL_HOST: localhost
+          MYSQL_HOST: mariadb
           MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: publisher_test
@@ -68,7 +68,8 @@ jobs:
         cache: 'npm'
     - name: DB connection test and conf checks
       run: |
-        netstat netstat -pnltu
+        netstat -pnltu
+        netstat -nat
         mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
         mysql -h127.0.0.1 -uroot -proot -e "show variables like 'char%';"
         mysql -h127.0.0.1 -uroot -proot -e "USE publisher_test;SHOW TABLES;"
