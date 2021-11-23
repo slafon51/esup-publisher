@@ -850,7 +850,7 @@
                         <artifactId>liquibase-maven-plugin</artifactId>
                         <version>${liquibase-plugin.version}</version>
                         <configuration combine.self="override">
-                            <url>jdbc:mariadb://mysql:3306/publisher_test?useUnicode=true&characterEncoding=UTF-8&autoreconnect=true&useLegacyDatetimeCode=false&serverTimezone=Europe/Paris</url>
+                            <url>jdbc:mariadb://mysql:3306/publisher_test?useUnicode=true&amp;characterEncoding=UTF-8&amp;autoreconnect=true&amp;useLegacyDatetimeCode=false&amp;serverTimezone=Europe/Paris</url>
                         </configuration>
                     </plugin>
                 </plugins>
