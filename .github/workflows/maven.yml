@@ -25,6 +25,7 @@ jobs:
       mariadb:
         image: wodby/mariadb:latest
         env:
+          MYSQL_HOST: 127.0.0.1
           MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: publisher_test
@@ -33,6 +34,7 @@ jobs:
         ports:
           - 3306/tcp
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+
 
     strategy:
       matrix:
@@ -48,7 +50,7 @@ jobs:
       run: |
         sudo locale-gen $LANG
         sudo update-locale LANG=$LANG
-        sudo apt install mysql-client
+        sudo apt install mysql-client net-tools
     - name: Check locales
       run: locale -a
     - name: Check date
@@ -66,9 +68,7 @@ jobs:
         cache: 'npm'
     - name: DB connection test and conf checks
       run: |
-        sudo apt update
-        sudo apt upgrade
-        sudo apt install -y mysql-client
+        netstat netstat -pnltu
         mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
         mysql -h127.0.0.1 -uroot -proot -e "show variables like 'char%';"
         mysql -h127.0.0.1 -uroot -proot -e "USE publisher_test;SHOW TABLES;"
