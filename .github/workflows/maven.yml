@@ -33,7 +33,7 @@ jobs:
           MYSQL_LOWER_CASE_TABLE_NAME: 1
         ports:
           - 3306:3306/tcp
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10 --lower_case_table_names=1
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
 
 
     strategy:
