@@ -23,17 +23,17 @@ jobs:
 
     services:
       mariadb:
-        image: wodby/mariadb:latest
+        image: jgribonvald/mariadb:latest
         env:
-          MYSQL_HOST: mariadb
           MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: publisher_test
           MYSQL_CHARACTER_SET_SERVER: utf8mb4
           MYSQL_COLLATION_SERVER: utf8mb4_unicode_520_ci
+          MYSQL_LOWER_CASE_TABLE_NAME: 1
         ports:
           - 3306:3306/tcp
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10 --lower_case_table_names=1
 
 
     strategy:
