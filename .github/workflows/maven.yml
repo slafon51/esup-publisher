@@ -23,15 +23,17 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:latest
+        image: wodby/mariadb:latest
         env:
           MYSQL_HOST: mariadb
           MYSQL_USER: root
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: publisher_test
+          MYSQL_CHARACTER_SET_SERVER: utf8mb4
+          MYSQL_COLLATION_SERVER: utf8mb4_unicode_520_ci
         ports:
           - 3306/tcp
-        options: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_520_ci --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=10s --health-retries=10
 
     strategy:
       matrix:
@@ -80,6 +82,7 @@ jobs:
         sudo apt install -y mysql-client
         mysqladmin ping
         mysql -hmysql -uroot -proot -e "SHOW DATABASES;"
+        mysql -hmysql -uroot -proot -e "show variables like 'char%';"
         mysql -hmysql -uroot -proot -e "USE publisher_test;SHOW TABLES;"
         # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
         mysql -h mariadb -u root -proot -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
