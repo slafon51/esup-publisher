@@ -69,7 +69,6 @@ jobs:
     - name: DB connection test and conf checks
       run: |
         netstat -pnltu
-        netstat -nat
         mysql -h127.0.0.1 -uroot -proot -e "SHOW DATABASES;"
         mysql -h127.0.0.1 -uroot -proot -e "show variables like 'char%';"
         mysql -h127.0.0.1 -uroot -proot -e "USE publisher_test;SHOW TABLES;"
@@ -88,5 +87,12 @@ jobs:
       run: |
         # apply Database fix in waiting a management of "perm" not null and "perm" is null in abstract way
         mysql -h127.0.0.1 -u root -proot -e "ALTER TABLE publisher_test.t_permission CHANGE perm perm VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NULL;"
+    - name: Maven notice:check
+      if: startsWith(matrix.java, '8')
+      run: ./mvnw notice:check -B
+    - name: Maven license:check
+      run: ./mvnw license:check -B
+    - name: Maven running API test
+      run: ./mvnw test -Pci -Dspring.profiles.active=test -Dapp.upload.path=$HOME/tmp -Dapp.upload.protectedPath=$HOME/tmp -Dspring.jpa.show-sql=false -Dlogging.config=classpath:logback-ci.xml -B
     - name: Build with Maven
-      run: ./mvnw -Pci -B package --file pom.xml
+      run: ./mvnw clean package -Pprod -Dmaven.test.skip=true -Darguments="-DskipTests -Dmaven.deploy.skip=true" -B
