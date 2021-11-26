@@ -78,7 +78,7 @@ script:
       ./mvnw notice:check
     fi
   - ./mvnw license:check
-  - ./mvnw test -Ptravis -Dspring.profiles.active=test -Dapp.upload.path=$HOME/tmp -Dapp.upload.protectedPath=$HOME/tmp -Dspring.jpa.show-sql=false -Dlogging.config=classpath:logback-travis.xml -B
+  - ./mvnw test -Ptravis -Dspring.config.additional-location="./src/main/resources/config/application-test.yml" -Dspring.profiles.active=test -Dapp.upload.path=$HOME/tmp -Dapp.upload.protectedPath=$HOME/tmp -Dspring.jpa.show-sql=false -Dlogging.config=classpath:logback-travis.xml -B
   - ./mvnw clean package -P prod -Dmaven.test.skip=true -Darguments="-DskipTests -Dmaven.deploy.skip=true"
 
 
