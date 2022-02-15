@@ -439,17 +439,18 @@ export default {
 
       if ((this.item === null || this.item === undefined || CommonUtils.equals({}, this.item)) && this.contentData && this.contentData.item) {
         const item = Object.assign({}, this.contentData.item)
-        this.setItem(item)
         this.updateMinDate(this.contentData.item)
         item.highlight = this.highlight
+        // update publisher information when modified
+        item.organization = Object.assign({}, this.publisher.context.organization)
+        item.redactor = Object.assign({}, this.publisher.context.redactor)
         this.setItem(item)
       } else if (this.item) {
         this.updateMinDate(this.item)
       } else {
         this.setItem({})
       }
-
-      if (CommonUtils.equals([], this.linkedFilesToContent) && this.contentData && this.contentData.linkedFiles) {
+      if ((this.linkedFilesToContent === null || this.linkedFilesToContent === undefined || this.linkedFilesToContent.length === 0) && this.contentData !== null && this.contentData !== undefined && this.contentData.linkedFiles) {
         this.setLinkedFilesToContent(Array.from(this.contentData.linkedFiles))
       }
 

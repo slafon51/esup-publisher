@@ -43,7 +43,7 @@
         <javax.inject.version>1</javax.inject.version>
         <liquibase-hibernate5.version>4.0.0</liquibase-hibernate5.version>
         <liquibase-plugin.version>${liquibase.version}</liquibase-plugin.version>
-        <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>
         <maven-sortpom-plugin.version>2.12.0</maven-sortpom-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven.build.timestamp.format>yyyyMMddHHmmss</maven.build.timestamp.format>
@@ -61,7 +61,23 @@
         <swagger-springmvc.version>1.0.2</swagger-springmvc.version>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>2.17.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-to-slf4j</artifactId>
+                <version>2.17.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
+
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-hibernate5</artifactId>
@@ -322,6 +338,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-properties-migrator</artifactId>
             <scope>runtime</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>android-json</artifactId>
+                    <groupId>com.vaadin.external.google</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -673,17 +695,7 @@
                         node/,
                         node_modules/,
                         src/,
-                        .jshintrc,
-                        babel.config.js,
-                        package.json,
-                        package-lock.json,
-                        vue.config.js,
-                        .env,
-                        .env.*,
                         public/,
-                        .browserslistrc,
-                        .eslintrc.js,
-                        jest.config.js,
                         tests/
                     </warSourceExcludes>
                     <webResources>
@@ -699,7 +711,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.5</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <id>jacoco-initialize</id>
@@ -856,7 +868,7 @@
             </dependencies>
         </profile>
         <profile>
-            <id>travis</id>
+            <id>ci</id>
             <!-- Same as dev expect for some properties to have less log, etc... all things required by travis -->
             <build>
                 <plugins>
@@ -913,9 +925,6 @@
                         <groupId>com.github.eirslett</groupId>
                         <artifactId>frontend-maven-plugin</artifactId>
                         <version>1.12.0</version>
-                        <configuration>
-                            <workingDirectory>src/main/webapp</workingDirectory>
-                        </configuration>
                         <executions>
                             <execution>
                                 <id>install node and npm</id>

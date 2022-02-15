@@ -13,32 +13,50 @@ class UserService {
     return FetchWrapper.getJson('api/users/fnattributes')
   }
 
-  canCreateInCtx () {
-    return FetchWrapper.getJson('api/users/perm/createin')
+  canCreateInCtx (keyId, keyType) {
+    return FetchWrapper.getJson('api/users/perm/createin?' + new URLSearchParams({
+      keyId: keyId,
+      keyType: keyType
+    }))
   }
 
-  canEditCtx () {
-    return FetchWrapper.getJson('api/users/perm/edit')
+  canEditCtx (keyId, keyType) {
+    return FetchWrapper.getJson('api/users/perm/edit?' + new URLSearchParams({
+      keyId: keyId,
+      keyType: keyType
+    }))
   }
 
-  canDeleteCtx () {
-    return FetchWrapper.getJson('api/users/perm/delete')
+  canDeleteCtx (keyId, keyType) {
+    return FetchWrapper.getJson('api/users/perm/delete?' + new URLSearchParams({
+      keyId: keyId,
+      keyType: keyType
+    }))
   }
 
-  canEditCtxPerms () {
-    return FetchWrapper.getJson('api/users/perm/editPerms')
+  canEditCtxPerms (keyId, keyType) {
+    return FetchWrapper.getJson('api/users/perm/editPerms?' + new URLSearchParams({
+      keyId: keyId,
+      keyType: keyType
+    }))
   }
 
-  canEditCtxTargets () {
-    return FetchWrapper.getJson('api/users/perm/editTargets')
+  canEditCtxTargets (keyId, keyType) {
+    return FetchWrapper.getJson('api/users/perm/editTargets?' + new URLSearchParams({
+      keyId: keyId,
+      keyType: keyType
+    }))
   }
 
   canModerateAnyThing () {
     return FetchWrapper.getJson('api/users/perm/moderate')
   }
 
-  canHighlight () {
-    return FetchWrapper.getJson('api/users/perm/highlight')
+  canHighlight (keyId, keyType) {
+    return FetchWrapper.getJson('api/users/perm/highlight?' + new URLSearchParams({
+      keyId: keyId,
+      keyType: keyType
+    }))
   }
 
   search (data) {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="mediaForm">
-        <div class="form-group hidden">
+        <div class="form-group d-none">
             <label class="control-label" for="ID">ID</label>
             <input type="text" class="form-control" name="id" id="ID"
                    v-model="item.id" readonly>
@@ -31,7 +31,7 @@
                     <span>{{ $t('media.enclosure-button') }}</span>
                 </button>
 
-                <img v-if="item.enclosure" name="enclosure" id="enclosure" :src="getUrlFromEnclosure()" />
+                <img v-if="item.enclosure" id="enclosure" :src="getUrlFromEnclosure()" :alt="$t('media.enclosure')"/>
                 <a v-if="item.enclosure" href="" data-bs-toggle="modal" data-bs-target="#deleteEnclosureConfirmation" v-tooltip="$t('entity.action.delete')">
                    <i class="far fa-times-circle text-danger"></i>
                 </a>

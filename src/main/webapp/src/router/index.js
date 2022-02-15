@@ -70,7 +70,18 @@ const routes = [
           roles: ['ROLE_USER'],
           cssClass: 'manager',
           managerCssClass: 'treeview'
-        }
+        },
+        children: [
+          {
+            path: 'details/:ctxType/:ctxId',
+            name: 'TreeviewCtxDetails',
+            component: () => import(/* webpackChunkName: "manager" */ '../views/manager/treeview/ctxDetails/CtxDetails.vue'),
+            meta: {
+              cssClass: 'treeview',
+              managerCssClass: 'treeview ctxDetails'
+            }
+          }
+        ]
       },
       {
         path: '/publish/:id?',
@@ -112,6 +123,51 @@ const routes = [
             component: () => import(/* webpackChunkName: "manager" */ '../views/manager/publish/targets/Targets.vue'),
             meta: {
               managerCssClass: 'publish publish.targets'
+            }
+          }
+        ]
+      },
+      {
+        path: '/contents',
+        name: 'Contents',
+        component: () => import(/* webpackChunkName: "manager" */ '../views/manager/contents/Contents.vue'),
+        meta: {
+          titleKey: 'manager.contents.title',
+          cssClass: 'contents'
+        },
+        children: [
+          {
+            path: 'owned',
+            name: 'ContentsOwned',
+            component: () => import(/* webpackChunkName: "manager" */ '../views/manager/contents/owned/Owned.vue'),
+            meta: {
+              managerCssClass: 'contents owned'
+            }
+          },
+          {
+            path: 'managed',
+            name: 'ContentsManaged',
+            component: () => import(/* webpackChunkName: "manager" */ '../views/manager/contents/managed/Managed.vue'),
+            meta: {
+              managerCssClass: 'contents managed'
+            }
+          },
+          {
+            path: 'pending',
+            name: 'ContentPending',
+            component: () => import(/* webpackChunkName: "manager" */ '../views/manager/contents/pending/Pending.vue'),
+            meta: {
+              managerCssClass: 'contents pending'
+            }
+          },
+          {
+            path: 'detail/:id',
+            name: 'ContentDetail',
+            component: () => import(/* webpackChunkName: "manager" */ '../views/manager/contents/details/ContentDetail.vue'),
+            meta: {
+              titleKey: 'manager.contents.details.title',
+              roles: ['ROLE_USER'],
+              managerCssClass: 'contents details'
             }
           }
         ]
@@ -297,6 +353,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  store.commit('setPreviousRoute', {
+    name: from.name,
+    params: from.params,
+    meta: from.meta
+  })
   store.commit('setNextRoute', {
     name: to.name,
     params: to.params,

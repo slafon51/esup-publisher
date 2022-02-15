@@ -27,7 +27,7 @@
             <li class="nav-item">
                 <router-link to="/publish/publisher" class="nav-link">
                     <span class="fas fa-pencil-alt fa-2x"></span>
-                    <span translate="global.menu.write">{{$t("global.menu.write")}}</span>
+                    <span>{{$t("global.menu.write")}}</span>
                 </router-link>
             </li>
             <li v-if="!canModerate" class="nav-item">
@@ -44,24 +44,23 @@
                     </span>
                 </a>
                 <ul class="dropdown-menu">
-                    <li :class="{active: isPageNameIncludes('owned')}"><a ui-sref="owned" class="dropdown-item"><span class="fas fa-asterisk"></span>
-                        &#xA0;<span>{{ $t("global.menu.manager.contents.owned") }}</span></a></li>
-                    <li :class="{active: isPageNameIncludes('managed')}"><a ui-sref="managed" class="dropdown-item"><span class="fas fa-asterisk"></span>
-                        &#xA0;<span>{{ $t("global.menu.manager.contents.managed") }}</span></a></li>
+                    <li :class="{active: isPageNameIncludes('owned')}"><router-link to="/contents/owned" class="dropdown-item"><span class="fas fa-asterisk"></span>
+                        &#xA0;<span>{{ $t("global.menu.manager.contents.owned") }}</span></router-link></li>
+                    <li :class="{active: isPageNameIncludes('managed')}"><router-link to="/contents/managed" class="dropdown-item"><span class="fas fa-asterisk"></span>
+                        &#xA0;<span>{{ $t("global.menu.manager.contents.managed") }}</span></router-link></li>
                 </ul>
             </li>
-            <li :class="{active: isPageNameIncludes('pending')}" v-can-moderate>
-                <a class="nav-link">
+            <li :class="{active: isPageNameIncludes('pending')}" v-if="canModerate">
+                <router-link to="/contents/pending" class="nav-link">
                     <span class="fas fa-gavel fa-2x"></span>
                     <span>{{ $t("global.menu.manager.contents.moderate") }}</span>
-                </a>
+                </router-link>
             </li>
-
-            <li :class="{active: isPageNameIncludes('treeview')}" v-can-moderate>
-                <a class="nav-link">
+            <li :class="{active: isPageNameIncludes('treeview')}" v-if="canModerate">
+                <router-link to="/treeview" class="nav-link">
                     <span class="fas fa-wrench fa-2x"></span>
                     <span >{{ $t("global.menu.manager.contexts.main") }}</span>
-                </a>
+                </router-link>
             </li>
         </ul>
     </div>
@@ -73,13 +72,10 @@ import UserService from '../../services/user/UserService'
 export default {
   name: 'NavBarManager',
   props: ['pageName'],
-  components: {},
   data () {
     return {
       canModerate: null
     }
-  },
-  computed: {
   },
   methods: {
     // Méthode permettant de surligner l'onglet sur

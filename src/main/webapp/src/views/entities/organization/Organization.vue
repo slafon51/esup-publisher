@@ -91,7 +91,7 @@
                         <button type="button" class="btn btn-default btn-outline-dark" data-bs-dismiss="modal" @click="clear">
                             <span class="fas fa-ban"></span>&nbsp;<span>{{$t('entity.action.cancel')}}</span>
                         </button>
-                        <button type="button" class="btn btn-primary" :class="{'disabled': formValidator.hasError() }" @click="createOrganization" >
+                        <button type="button" class="btn btn-primary" :disabled="formValidator.hasError()" @click="createOrganization" >
                             <span class="fas fa-download"></span>&nbsp;<span>{{$t('entity.action.save')}}</span>
                         </button>
                     </div>
@@ -216,9 +216,9 @@ export default {
         this.organization.identifiers = []
         if (identifiersValues.includes(',')) {
           identifiersValues = identifiersValues.split(',')
-          for (var i = 0; i < identifiersValues.length; i++) {
-            this.organization.identifiers.push(identifiersValues[i])
-          }
+          identifiersValues.forEach(identifiersValue => {
+            this.organization.identifiers.push(identifiersValue)
+          })
         } else {
           this.organization.identifiers.push(identifiersValues)
         }

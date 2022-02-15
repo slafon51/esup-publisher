@@ -15,13 +15,14 @@
  */
 package org.esupportail.publisher.web;
 
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -32,6 +33,8 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import org.esupportail.publisher.Application;
 import org.esupportail.publisher.config.Constants;
 import org.esupportail.publisher.domain.AbstractItem;
@@ -62,7 +65,6 @@ import org.esupportail.publisher.repository.PublisherRepository;
 import org.esupportail.publisher.repository.ReaderRepository;
 import org.esupportail.publisher.repository.RedactorRepository;
 import org.esupportail.publisher.repository.SubscriberRepository;
-import org.esupportail.publisher.service.ContentService;
 import org.esupportail.publisher.service.HighlightedClassificationService;
 import org.esupportail.publisher.service.SubscriberService;
 import org.esupportail.publisher.service.bean.ServiceUrlHelper;
@@ -74,16 +76,11 @@ import org.esupportail.publisher.service.factories.RubriqueVOFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.Repeat;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -91,10 +88,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Sets;
-
-import lombok.extern.slf4j.Slf4j;
 
 
 /**
@@ -208,7 +201,7 @@ public class PublishControllerTest {
     private News savedNews;
 
     @Before
-    public void initTest() {
+    public void initTest() throws InterruptedException {
         organization = new Organization();
         organization.setDescription("A Desc");
         organization.setDisplayOrder(200);
@@ -249,6 +242,7 @@ public class PublishControllerTest {
         // number of cats in publisher newWay is needed in getItemsFromPublisherTest
         // NB important, à la une isn't persisted, it's hardcoded and should be considered
         Category cat1 = ObjTest.newCategory("Cat A", newWay);
+        cat1.setDefaultDisplayOrder(DisplayOrderType.CUSTOM);
         cat1 = categoryRepository.saveAndFlush(cat1);
         Category cat2 = ObjTest.newCategory("cat B", newWay);
         cat2 = categoryRepository.saveAndFlush(cat2);
@@ -264,10 +258,12 @@ public class PublishControllerTest {
         catsOfEsupLectureWay.add(cat6);
 
         News news1 = ObjTest.newNews("news 1", organization, newWay.getContext().getRedactor());
+        // Don't update date, a test on SCHEDULED => PUBLISHED is made
         news1.setStartDate(LocalDate.now());
         news1.setEndDate(LocalDate.now().plusMonths(1));
         news1.setStatus(ItemStatus.SCHEDULED);
         news1 = itemRepository.saveAndFlush(news1);
+        final Instant news1DateModify = news1.getLastModifiedDate().minusSeconds(1);
         News news2 = ObjTest.newNews("news 2", organization, newWay.getContext().getRedactor());
         news2.setStartDate(LocalDate.now().minusDays(1));
         news2.setEndDate(LocalDate.now().plusMonths(1));
@@ -305,11 +301,17 @@ public class PublishControllerTest {
         news6.setStatus(ItemStatus.PUBLISHED);
         news6 = itemRepository.saveAndFlush(news6);
 
+        Thread.sleep(1000);
         int nbModif = itemRepository.publishScheduled();
         // test news1 SCHEDULED => PUBLISHED + update datemodification and move it to First news in order
         Assert.assertEquals(1, nbModif);
         news1 = (News)itemRepository.findById(news1.getId()).orElse(null);
         Assert.assertNotNull(news1);
+        Assert.assertEquals(news1.getStatus(), ItemStatus.PUBLISHED);
+        // This part check if the
+        log.debug("Modified time before {} and after running publishScheduled {}", news1DateModify, news1.getLastModifiedDate());
+        Assert.assertTrue("The PublishScheduled task run an update on a wrong timezone ! Check DB time_zone and your java server timezone",
+                news1.getLastModifiedDate().isAfter(news1DateModify));
 
         files.add(new LinkedFileItem("20052/201608259432.jpg", "truc-image.jpg", attachment, false, "image/jpg"));
         files.add(new LinkedFileItem("20052/BBBAADFDSDSD.jpg", "truc2.pdf", attachment, false, "application/pdf"));
