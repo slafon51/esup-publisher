@@ -564,6 +564,7 @@
                         <exclude>.tmp/**</exclude>
                         <exclude>.mvn/**</exclude>
                         <exclude>src/main/webapp/META-INF/**</exclude>
+						<exclude>src/main/webapp/public/swagger-ui/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
