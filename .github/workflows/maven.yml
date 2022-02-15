@@ -104,7 +104,7 @@ jobs:
         ./mvnw compile liquibase:update -Pci -B
         mkdir -p ${{ github.workspace }}/tmp
         # install npm
-        npm install
+        npm ci --no-optional
         npm run test:unit
     - name: DB final conf
       run: |
